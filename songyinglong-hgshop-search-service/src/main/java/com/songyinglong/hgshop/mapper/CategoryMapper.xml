@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.songyinglong.hgshop.mapper.CategoryMapper">
+  <resultMap id="BaseResultMap" type="com.songyinglong.hgshop.entity.Category">
+  <id column="id" jdbcType="INTEGER" property="id" />
+  <result column="parent_id" jdbcType="INTEGER" property="parentId" />
+  <result column="name" jdbcType="VARCHAR" property="name" />
+  <result column="level" property="level"/>
+  <collection property="brands" ofType="Brand" select="selectCategoryBrandByCategoryId" column="id">
+  </collection>
+  <collection property="specs" ofType="Spec" select="selectCategorySpecByCategoryId" column="id">
+  </collection>
+</resultMap>
+<resultMap id="BaseResultMap2" type="com.songyinglong.hgshop.entity.Category">
+  <id column="id" jdbcType="INTEGER" property="id" />
+  <result column="name" jdbcType="VARCHAR" property="name" />
+  <collection property="specs" ofType="Spec">
+    <id column="spec_id" property="id"/>
+    <result column="spec_name" property="specName"/>
+    <collection property="specOptions" select="com.songyinglong.hgshop.mapper.SpecOptionMapper.selectBySpecId" column="spec_id"/>
+  </collection>
+  <collection property="spus" ofType="Spu">
+    <id column="spu_id" property="id"/>
+    <result column="goods_name" property="goodsName" />
+  </collection>
+</resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, parent_id, name
+  </sql>
+  <select id="selectByExample" parameterType="com.songyinglong.hgshop.entity.Category" resultType="Category">
+    select
+      distinct
+    a.id,a.`name`,a.`level`,b.id parentId,b.`name` parentName
+    from hg_category a left JOIN hg_category b on a.parent_id = b.id
+    <where>
+      <if test="name !=null and name !='' ">
+        a.name like  CONCAT('%',#{name},'%')
+      </if>
+    </where>
+  </select>
+
+  <resultMap type="category" id="categoryMap">
+    <id column="id" property="id"/>
+    <result column="name" property="name"/>
+    <collection property="childs" javaType="arrayList" ofType="Category">
+      <id column="c2_id" property="id"/>
+      <result column="c2_name" property="name"/>
+      <collection property="childs" javaType="arrayList" ofType="Category">
+        <id column="c3_id" property="id"/>
+        <result column="c3_name" property="name"/>
+      </collection>
+    </collection>
+  </resultMap>
+
+  <select id="selectAllCategories" resultMap="categoryMap">
+    select c1.id,c1.name,c2.id c2_id,c2.name c2_name,c3.id c3_id, c3.name c3_name from hg_category c1 left join hg_category c2 on c1.id=c2.parent_id left join hg_category c3 on c2.id=c3.parent_id where c1.parent_id=0
+  </select>
+
+  <select id="getChildCategoryCount" resultType="int">
+    select count(0) from hg_category where parent_id=#{id}
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+      distinct
+    a.id,a.`name`,a.`level`,b.id parentId,b.`name` parentName
+    from hg_category a left JOIN hg_category b on a.parent_id = b.id
+    where a.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from hg_category
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.songyinglong.hgshop.entity.CategoryExample">
+    delete from hg_category
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.songyinglong.hgshop.entity.Category" useGeneratedKeys="true" keyProperty="id">
+    insert into hg_category (id, parent_id, name ,level
+      )
+    values (#{id,jdbcType=INTEGER}, #{parentId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{level}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.songyinglong.hgshop.entity.Category">
+    insert into hg_category
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="parentId != null">
+        parent_id,
+      </if>
+      <if test="name != null">
+        name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="parentId != null">
+        #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.songyinglong.hgshop.entity.CategoryExample" resultType="java.lang.Long">
+    select count(*) from hg_category
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <select id="selectParentId" resultType="java.lang.Integer">
+    SELECT parent_id from hg_category WHERE id=#{id}
+  </select>
+  <select id="selectCategoryBrandByCategoryId" resultType="com.songyinglong.hgshop.entity.Brand">
+    SELECT DISTINCT a.brand_id id,b.name from hg_brand_category a INNER JOIN hg_brand b on a.brand_id=b.id WHERE a.category_id=#{categoryId}
+  </select>
+    <select id="selectCategorySpecByCategoryId" resultType="com.songyinglong.hgshop.entity.Spec">
+        SELECT a.spec_id id,b.spec_name from hg_category_spec a INNER JOIN hg_spec b on a.spec_id=b.id WHERE a.category_id=#{categoryId}
+    </select>
+  <select id="selectSpecsAndSpusByCatrgory" resultMap="BaseResultMap2">
+    SELECT a.id,a.name,c.id spec_id,c.spec_name,d.id spu_id,d.goods_name from hg_category a INNER JOIN hg_category_spec b on a.id=b.category_id INNER JOIN hg_spec c on b.spec_id=c.id INNER JOIN hg_spu d on a.id=d.category_id  WHERE a.id=#{id}
+  </select>
+  <select id="getChildsIdByCategoryId" resultType="java.lang.Integer">
+    select b.id from hg_category a INNER JOIN hg_category b on a.id=b.parent_id WHERE a.id=#{categoryId}
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update hg_category
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.parentId != null">
+        parent_id = #{record.parentId,jdbcType=INTEGER},
+      </if>
+      <if test="record.name != null">
+        name = #{record.name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update hg_category
+    set id = #{record.id,jdbcType=INTEGER},
+      parent_id = #{record.parentId,jdbcType=INTEGER},
+      name = #{record.name,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.songyinglong.hgshop.entity.Category">
+    update hg_category
+    <set>
+      <if test="parentId != null">
+        parent_id = #{parentId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.songyinglong.hgshop.entity.Category">
+    update hg_category
+    set parent_id = #{parentId,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR},
+      level = #{level}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+    <insert id="insertBrandCategory" >
+        INSERT into hg_brand_category VALUES (null,#{brandId},#{categoryId})
+    </insert>
+    <insert id="insertCategorySpec">
+        INSERT into hg_category_spec VALUES (null,#{category.id},#{spec.id})
+    </insert>
+  <delete id="deleteBrandCategory">
+    DELETE from hg_brand_category where category_id=#{categoryId}
+  </delete>
+  <delete id="deleteCategorySpecByCategoryId">
+    DELETE  from hg_category_spec where category_id=#{categoryId}
+  </delete>
+  <select id="selectCategoryNamesByThreeCategoryId" resultType="string">
+    select concat_ws(' ',c1.name,c2.name,c3.name) names
+    from hg_category c1 join hg_category c2 on c2.parent_id=c1.id
+    join hg_category c3 on c3.parent_id=c2.id
+    where c3.id=#{id}
+  </select>
+  <select id="selectCategoryByIds" resultType="category">
+    select * from hg_category where id in
+    <foreach collection="list" open="(" close=")" separator="," item="id">
+      #{id}
+    </foreach>
+  </select>
+</mapper>

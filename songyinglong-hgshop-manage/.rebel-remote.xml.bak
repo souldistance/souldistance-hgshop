@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rebel-remote xmlns="http://www.zeroturnaround.com/rebel/remote" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://www.zeroturnaround.com/rebel/remote
+http://www.zeroturnaround.com/rebel/remote ">
+    <id>com.songyinglong-hgshop.songyinglong-hgshop-manage</id>
+</rebel-remote>

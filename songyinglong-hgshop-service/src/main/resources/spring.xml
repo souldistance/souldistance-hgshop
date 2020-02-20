@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://dubbo.apache.org/schema/dubbo 
+        http://dubbo.apache.org/schema/dubbo/dubbo.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.1.xsd">
+
+		<!--  扫描包-->
+<context:component-scan base-package="com.songyinglong.hgshop">
+	<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+</context:component-scan>
+<!--2、 指定外部属性文件的位置 -->
+	<context:property-placeholder
+		location="classpath:db.properties,classpath:redis.properties" />
+<!-- 3.使用druid数据源 连接池 -->
+	<bean id="dataSource" 
+		class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="${jdbc.driver}">
+		</property>
+		<property name="url" value="${jdbc.url}">
+		</property>
+		<property name="username" value="${jdbc.username}">
+		</property>
+		<property name="password" value="${jdbc.password}">
+		</property>
+	</bean>
+
+<!-- 	SqlSessionFactory-->
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	<!-- 注入数据源 -->
+	<property name="dataSource" ref="dataSource"></property>
+	<!-- 加载mybatis的核心配置文件 -->
+	<property name="configLocation" value="classpath:mybatis.xml"></property>
+	<!-- mybatis的xml文件放到resource的mybatis文件夹下 与mapper接口分开 -->
+	<!-- <property name="mapperLocations" value="classpath:mybatis/*.xml"></property> -->
+</bean>
+<!-- 事务 -->
+<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dataSource"></property>
+</bean>
+
+<!-- AOP -->
+<tx:advice transaction-manager="transactionManager" id="txAdvice">
+		  <!-- 事务属性配置 -->
+		  <tx:attributes>
+		  	<tx:method name="get*" read-only="true"/>
+		  	<tx:method name="select*" read-only="true"/>
+		  	<tx:method name="list*" read-only="true"/>
+		  	<tx:method name="load*" read-only="true"/>
+		  	<tx:method name="find*" read-only="true"/>
+		  	<tx:method name="query*" read-only="true"/>
+		  	<tx:method name="*" propagation="REQUIRED"/>
+			<tx:method name="*" rollback-for="Exception" />
+		  </tx:attributes>
+</tx:advice>
+
+
+<aop:config>
+	 <!-- 配置切点表达式 -->
+	<aop:pointcut expression="execution(* com.songyinglong.hgshop.service.*.*(..))" id="point"/>
+	 <!-- 关联事务 -->
+	 <aop:advisor advice-ref="txAdvice" pointcut-ref="point"/>
+</aop:config>
+
+<!-- 4-2 Or支持事务注解 -->
+	<!-- <tx:annotation-driven transaction-manager="transactionManager" />-->
+	<!-- 5.配置aop -->
+	<!-- 5-1 通过注解配置aop -->
+	<!-- <aop:aspectj-autoproxy /> -->
+	
+	<!-- 5-1 通过xml配置aop -->
+	<!-- 	
+	<bean id="aspect" class="com.bawei.aop.Aspect" />
+	<aop:config>
+		<aop:aspect ref="aspect">
+			<aop:pointcut expression="execution(* *.work(..))"			
+				id="workPointCut" />
+			<aop:before method="before" pointcut-ref="workPointCut" />	
+			<aop:after method="after" pointcut-ref="workPointCut" />
+			<aop:around method="around" pointcut-ref="workPointCut" />
+			<aop:after-throwing method="afterThrow" pointcut-ref="workPointCut" />	
+			<aop:after-returning method="afterReturn" pointcut-ref="sayings" />	
+		</aop:aspect>
+	</aop:config>
+	-->	
+
+	<!-- 导入dubbo服务端配置 -->
+	<import resource="dubbo-provider.xml"/>
+	
+
+<!-- 扫描mapper文件 -->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+	<property name="basePackage" value="com.songyinglong.hgshop.mapper"></property>
+</bean>
+	<!-- 导入redis -->
+	<import resource="spring-redis.xml"/>
+	<import resource="spring-es.xml"/>
+	<!-- 导入kafka -->
+	<!--<import resource="spring-kafka-producer.xml"/>
+	<import resource="spring-kafka-consumer.xml"/>-->
+</beans>

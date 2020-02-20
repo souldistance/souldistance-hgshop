@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+<!-- 数据库中的下划线转成驼峰标志 -->
+<settings>
+	<setting name="mapUnderscoreToCamelCase" value="true"/>
+</settings>
+
+<!-- 别名配置 -->
+ <typeAliases>
+   <package name="com.songyinglong.hgshop.entity"/>
+ </typeAliases>
+ 
+ 
+ <!-- 配置分页助手拦截器 -->
+<plugins>
+ <plugin interceptor="com.github.pagehelper.PageInterceptor"></plugin>
+ 
+ </plugins>
+</configuration>

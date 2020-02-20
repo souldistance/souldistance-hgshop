@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.songyinglong.hgshop.mapper.SkuMapper">
+  <resultMap id="BaseResultMap" type="com.songyinglong.hgshop.entity.Sku">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="sell_point" jdbcType="VARCHAR" property="sellPoint" />
+    <result column="price" jdbcType="INTEGER" property="price" />
+    <result column="stock_count" jdbcType="INTEGER" property="stockCount" />
+    <result column="barcode" jdbcType="VARCHAR" property="barcode" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="cost_price" jdbcType="DECIMAL" property="costPrice" />
+    <result column="market_price" jdbcType="DECIMAL" property="marketPrice" />
+    <result column="spu_id" jdbcType="INTEGER" property="spuId" />
+    <result column="cart_thumbnail" jdbcType="VARCHAR" property="cartThumbnail" />
+  </resultMap>
+  <resultMap id="BaseResultMap2" type="com.songyinglong.hgshop.entity.Sku">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="sell_point" jdbcType="VARCHAR" property="sellPoint" />
+    <result column="price" jdbcType="INTEGER" property="price" />
+    <result column="stock_count" jdbcType="INTEGER" property="stockCount" />
+    <result column="barcode" jdbcType="VARCHAR" property="barcode" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="status" jdbcType="VARCHAR" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="cost_price" jdbcType="DECIMAL" property="costPrice" />
+    <result column="market_price" jdbcType="DECIMAL" property="marketPrice" />
+    <result column="spu_id" jdbcType="INTEGER" property="spuId" />
+    <result column="cart_thumbnail" jdbcType="VARCHAR" property="cartThumbnail" />
+    <association property="spu" javaType="Spu">
+        <id column="goods_id" property="id"/>
+        <result column="category_id" property="categoryId"/>
+      <result column="goods_name" property="goodsName"/>
+    </association>
+    <collection property="specs" ofType="com.songyinglong.hgshop.entity.Spec">
+        <id column="spec_id" property="id"/>
+      <result column="spec_name" property="specName"/>
+      <collection property="specOptions" ofType="SpecOption" select="com.songyinglong.hgshop.mapper.SpecOptionMapper.selectBySkuId" column="{skuId=id,specId=spec_id}" />
+    </collection>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, title, sell_point, price, stock_count, barcode, image, status, create_time, update_time, 
+    cost_price, market_price, spu_id, cart_thumbnail
+  </sql>
+  <select id="selectByExample" parameterType="com.songyinglong.hgshop.entity.SkuExample" resultType="Sku">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from hg_sku
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap2">
+    SELECT a.*,b.id goods_id,b.goods_name,b.category_id,d.id spec_id,d.spec_name from hg_sku a LEFT JOIN hg_spu b on a.spu_id=b.id LEFT JOIN hg_sku_spec c on a.id=c.sku_id LEFT JOIN hg_spec d on c.spec_id=d.id WHERE a.id=#{id}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from hg_sku
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.songyinglong.hgshop.entity.SkuExample">
+    delete from hg_sku
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.songyinglong.hgshop.entity.Sku" useGeneratedKeys="true" keyProperty="id">
+    insert into hg_sku (id, title, sell_point, 
+      price, stock_count, barcode, 
+      image, status, create_time, 
+      update_time, cost_price, market_price, 
+      spu_id, cart_thumbnail)
+    values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, #{sellPoint,jdbcType=VARCHAR}, 
+      #{price,jdbcType=INTEGER}, #{stockCount,jdbcType=INTEGER}, #{barcode,jdbcType=VARCHAR}, 
+      #{image,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP}, #{costPrice,jdbcType=DECIMAL}, #{marketPrice,jdbcType=DECIMAL}, 
+      #{spuId,jdbcType=INTEGER}, #{cartThumbnail,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.songyinglong.hgshop.entity.Sku">
+    insert into hg_sku
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="title != null">
+        title,
+      </if>
+      <if test="sellPoint != null">
+        sell_point,
+      </if>
+      <if test="price != null">
+        price,
+      </if>
+      <if test="stockCount != null">
+        stock_count,
+      </if>
+      <if test="barcode != null">
+        barcode,
+      </if>
+      <if test="image != null">
+        image,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="costPrice != null">
+        cost_price,
+      </if>
+      <if test="marketPrice != null">
+        market_price,
+      </if>
+      <if test="spuId != null">
+        spu_id,
+      </if>
+      <if test="cartThumbnail != null">
+        cart_thumbnail,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="title != null">
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="sellPoint != null">
+        #{sellPoint,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        #{price,jdbcType=INTEGER},
+      </if>
+      <if test="stockCount != null">
+        #{stockCount,jdbcType=INTEGER},
+      </if>
+      <if test="barcode != null">
+        #{barcode,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="costPrice != null">
+        #{costPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="marketPrice != null">
+        #{marketPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="spuId != null">
+        #{spuId,jdbcType=INTEGER},
+      </if>
+      <if test="cartThumbnail != null">
+        #{cartThumbnail,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.songyinglong.hgshop.entity.SkuExample" resultType="java.lang.Long">
+    select count(*) from hg_sku
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+    <select id="selectNews" resultType="com.songyinglong.hgshop.entity.Sku">
+      SELECT * from (select id,title,price,image,spu_id,create_time from hg_sku  order by create_time desc)a  group by a.spu_id order by a.create_time desc  limit #{pageSize}
+    </select>
+  <select id="selectSkusBySpuId" resultType="com.songyinglong.hgshop.entity.Sku">
+    select id,title,image,price from hg_sku where spu_id=#{spuId}
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update hg_sku
+    <set>
+      <if test="record.id != null">
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.title != null">
+        title = #{record.title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sellPoint != null">
+        sell_point = #{record.sellPoint,jdbcType=VARCHAR},
+      </if>
+      <if test="record.price != null">
+        price = #{record.price,jdbcType=INTEGER},
+      </if>
+      <if test="record.stockCount != null">
+        stock_count = #{record.stockCount,jdbcType=INTEGER},
+      </if>
+      <if test="record.barcode != null">
+        barcode = #{record.barcode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.image != null">
+        image = #{record.image,jdbcType=VARCHAR},
+      </if>
+      <if test="record.status != null">
+        status = #{record.status,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null">
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.costPrice != null">
+        cost_price = #{record.costPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.marketPrice != null">
+        market_price = #{record.marketPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.spuId != null">
+        spu_id = #{record.spuId,jdbcType=INTEGER},
+      </if>
+      <if test="record.cartThumbnail != null">
+        cart_thumbnail = #{record.cartThumbnail,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update hg_sku
+    set id = #{record.id,jdbcType=INTEGER},
+      title = #{record.title,jdbcType=VARCHAR},
+      sell_point = #{record.sellPoint,jdbcType=VARCHAR},
+      price = #{record.price,jdbcType=INTEGER},
+      stock_count = #{record.stockCount,jdbcType=INTEGER},
+      barcode = #{record.barcode,jdbcType=VARCHAR},
+      image = #{record.image,jdbcType=VARCHAR},
+      status = #{record.status,jdbcType=VARCHAR},
+      create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      cost_price = #{record.costPrice,jdbcType=DECIMAL},
+      market_price = #{record.marketPrice,jdbcType=DECIMAL},
+      spu_id = #{record.spuId,jdbcType=INTEGER},
+      cart_thumbnail = #{record.cartThumbnail,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.songyinglong.hgshop.entity.Sku">
+    update hg_sku
+    <set>
+      <if test="title != null">
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="sellPoint != null">
+        sell_point = #{sellPoint,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        price = #{price,jdbcType=INTEGER},
+      </if>
+      <if test="stockCount != null">
+        stock_count = #{stockCount,jdbcType=INTEGER},
+      </if>
+      <if test="barcode != null">
+        barcode = #{barcode,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        image = #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="costPrice != null">
+        cost_price = #{costPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="marketPrice != null">
+        market_price = #{marketPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="spuId != null">
+        spu_id = #{spuId,jdbcType=INTEGER},
+      </if>
+      <if test="cartThumbnail != null">
+        cart_thumbnail = #{cartThumbnail,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.songyinglong.hgshop.entity.Sku">
+    update hg_sku
+    set title = #{title,jdbcType=VARCHAR},
+      sell_point = #{sellPoint,jdbcType=VARCHAR},
+      price = #{price,jdbcType=INTEGER},
+      stock_count = #{stockCount,jdbcType=INTEGER},
+      barcode = #{barcode,jdbcType=VARCHAR},
+      image = #{image,jdbcType=VARCHAR},
+      status = #{status,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      cost_price = #{costPrice,jdbcType=DECIMAL},
+      market_price = #{marketPrice,jdbcType=DECIMAL},
+      spu_id = #{spuId,jdbcType=INTEGER},
+      cart_thumbnail = #{cartThumbnail,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <resultMap type="sku" id="skuMap">
+    <id column="id" property="id" />
+    <result column="title" property="title" />
+    <result column="sell_point" property="sellPoint" />
+    <result column="price" property="price" />
+    <result column="stock_count" property="stockCount" />
+    <result column="barcode" property="barcode" />
+    <result column="image" property="image" />
+    <result column="status" property="status" />
+    <result column="create_time" property="createTime" />
+    <result column="update_time" property="updateTime" />
+    <result column="cost_price" property="costPrice" />
+    <result column="market_price" property="marketPrice" />
+    <result column="spu_id" property="spuId" />
+    <result column="cart_thumbnail" property="cartThumbnail" />
+    <collection property="skuSpecs" javaType="list" ofType="skuSpec">
+      <id column="ks_id" property="id"/>
+      <result column="spec_id" property="specId"/>
+      <result column="spec_option_id" property="specOptionId"/>
+    </collection>
+  </resultMap>
+  <select id="selectSkuById1" resultMap="skuMap">
+    select k.id,k.title,k.sell_point,k.image,k.price,k.market_price,k.spu_id,ks.spec_option_id,k.stock_count
+    from hg_sku k join hg_sku_spec ks on k.id=ks.sku_id
+    where k.id=#{id}
+  </select>
+  <select id="selectSkuBySpecOptionIds" resultType="sku">
+    select k.id,k.title,k.sell_point,k.image,k.price,k.market_price,k.spu_id,k.stock_count
+    from hg_sku k
+    <foreach collection="optionIds" index="i">
+      join hg_sku_spec ks${i} ON k.id=ks${i}.sku_id
+    </foreach>
+    <where>
+      <foreach collection="optionIds" index="i" item="id">
+        and ks${i}.spec_option_id=#{id}
+      </foreach>
+        and k.spu_id=#{spuId}
+    </where>
+  </select>
+
+  <select id="selectSkuById2" resultType="sku">
+    select id,title,image,price from hg_sku where id=#{id}
+  </select>
+</mapper>
